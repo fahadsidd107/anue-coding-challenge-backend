@@ -5,29 +5,39 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
-    // ConfigModule to load .env file
     ConfigModule.forRoot({
-      isGlobal: true, // Make the config globally available
-      envFilePath: '.env', // Load environment variables from .env file
+      isGlobal: true,
+      envFilePath: '.env',
     }),
 
-    // TypeOrmModule configuration using environment variables
     TypeOrmModule.forRootAsync({
-      imports: [ConfigModule], // Import ConfigModule so we can inject ConfigService
-      inject: [ConfigService], // Inject ConfigService to access the environment variables
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        host: configService.get<string>('DATABASE_HOST', 'localhost'),
-        port: configService.get<number>('DATABASE_PORT', 5432),
-        username: configService.get<string>('DATABASE_USERNAME', 'fahad'),
-        password: configService.get<string>('DATABASE_PASSWORD', 'Realmadridc.f631902'),
-        database: configService.get<string>('DATABASE_NAME', 'anuedb'),
-        entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        synchronize: true, // Set to false in production
-      }),
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => {
+        const databaseUrl = configService.get<string>('DB_URL');
+        
+        // Log the URL (remove in production)
+        console.log('Database URL:', databaseUrl);
+
+        return {
+          type: 'postgres',
+          url: databaseUrl,
+          entities: [__dirname + '/**/*.entity{.ts,.js}'],
+          synchronize: true,
+          ssl: {
+            rejectUnauthorized: false
+          },
+          extra: {
+            // Add connection timeout
+            connectionTimeoutMillis: 5000
+          },
+          // Add logging to see what's happening
+          logging: true
+        };
+      },
     }),
 
-    TasksModule, // Import TasksModule
+    TasksModule,
   ],
   controllers: [],
   providers: [],
