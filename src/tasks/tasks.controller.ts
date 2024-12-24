@@ -13,7 +13,7 @@ export class TasksController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string): Promise<Task> {
+  async findOne(@Param('id') id: number): Promise<Task> {
     const task = await this.tasksService.findOne(id);
     if (!task) {
       throw new NotFoundException(`Task with ID ${id} not found`); // Throw NotFoundException with custom message
@@ -28,12 +28,12 @@ export class TasksController {
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() task: Partial<Task>): Promise<Task> {
+  update(@Param('id') id: number, @Body() task: Partial<Task>): Promise<Task> {
     return this.tasksService.update(id, task);
   }
 
   @Delete(':id')
-  delete(@Param('id') id: string): Promise<void> {
+  delete(@Param('id') id: number): Promise<void> {
     return this.tasksService.delete(id);
   }
 
